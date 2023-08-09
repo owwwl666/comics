@@ -83,11 +83,13 @@ def publishes_post_in_group(comic_number, parameters):
 if __name__ == '__main__':
     env = Env()
     env.read_env()
+
     parameters = {
         'group_id': env('VK_GROUP_ID'),
         'access_token': env('VK_ACCESS_TOKEN'),
         'v': env('VK_API_VERSION'),
     }
+
     comic_number = returns_number_random_comic()
 
     comic_url = f'https://xkcd.com/{comic_number}/info.0.json'
