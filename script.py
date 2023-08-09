@@ -31,10 +31,10 @@ def returns_comments_comic(url):
     return comic['alt']
 
 
-def gets_address_upload_photo(params):
+def gets_address_upload_photo(parameters):
     """Получает адрес для загрузки фото."""
     response = requests.get(
-        f'https://api.vk.com/method/photos.getWallUploadServer', params=params)
+        f'https://api.vk.com/method/photos.getWallUploadServer', params=parameters)
     response.raise_for_status()
     return response.json()['response']['upload_url']
 
@@ -49,41 +49,41 @@ def sends_comic_server(comic_path):
         files = {
             'photo': file
         }
-        url = gets_address_upload_photo(params)
+        url = gets_address_upload_photo(parameters)
         response = requests.post(url, files=files)
         response.raise_for_status()
     return response.json()
 
 
-def saves_comic_group_album(params):
+def saves_comic_group_album(parameters):
     """Сохраняет комикс в альбоме группы Вконтакте.
 
     Возвращает json с информацией о загруженном комиксе.
     """
     url = f'https://api.vk.com/method/photos.saveWallPhoto'
-    params |= sends_comic_server(comic_path=comic_path)
-    saving_comic_group_album = requests.post(url, params=params)
+    parameters |= sends_comic_server(comic_path=comic_path)
+    saving_comic_group_album = requests.post(url, params=parameters)
     saving_comic_group_album.raise_for_status()
     return saving_comic_group_album.json()
 
 
-def publishes_post_in_group(comic_number, params):
+def publishes_post_in_group(comic_number, parameters):
     """Публикует пост на стену в группу Вконтакте."""
-    media_id = saves_comic_group_album(params)['response'][0]['id']
+    media_id = saves_comic_group_album(parameters)['response'][0]['id']
     url = f'https://api.vk.com/method/wall.post'
-    params |= {
+    parameters |= {
         'owner_id': -env.int('VK_GROUP_ID'),
         'from_group': 1,
         'attachments': f'{"photo"}{env.int("VK_OWNER_ID")}_{media_id}',
         'message': returns_comments_comic(url=f'https://xkcd.com/{comic_number}/info.0.json')
     }
-    requests.post(url, params=params).raise_for_status()
+    requests.post(url, params=parameters).raise_for_status()
 
 
 if __name__ == '__main__':
     env = Env()
     env.read_env()
-    params = {
+    parameters = {
         'group_id': env('VK_GROUP_ID'),
         'access_token': env('VK_ACCESS_TOKEN'),
         'v': env('VK_API_VERSION'),
@@ -94,6 +94,6 @@ if __name__ == '__main__':
     comic_path = f'comic_{comic_number}.png'
 
     downloads_comic(url=comic_url, comic_path=comic_path)
-    publishes_post_in_group(comic_number=comic_number, params=params)
+    publishes_post_in_group(comic_number=comic_number, parameters=parameters)
 
     os.remove(comic_path)
