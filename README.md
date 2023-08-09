@@ -30,5 +30,6 @@ pip install -r requirements.txt
   ```
   python script.py
   ```
-  ## Результаты:
+  
+## Результаты
   ![image](https://github.com/owwwl666/comics/assets/131767856/647ba834-df7c-49f0-a704-d7bfeff1a46e)
