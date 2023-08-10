@@ -62,9 +62,9 @@ def save_in_group_album_comic(parameters):
     """
     url = f'https://api.vk.com/method/photos.saveWallPhoto'
     parameters |= send_server_comic(comic_path)
-    saving_comic_group_album = requests.post(url, params=parameters)
-    saving_comic_group_album.raise_for_status()
-    return saving_comic_group_album.json()
+    sending_comic = requests.post(url, params=parameters)
+    sending_comic.raise_for_status()
+    return sending_comic.json()
 
 
 def publish_in_group_post(comic_comments, parameters):
