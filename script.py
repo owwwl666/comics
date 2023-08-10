@@ -4,13 +4,12 @@ import os
 from environs import Env
 
 
-def upload_random_comic_number():
-    """Загружает номер случайного комикса."""
+def download_all_comics():
+    """Скачивает все комиксы."""
     url = 'https://xkcd.com/info.0.json'
     response = requests.get(url)
     response.raise_for_status()
-    random_comic_number = random.randint(1, response.json()['num'])
-    return random_comic_number
+    return response.json()
 
 
 def download_comic():
@@ -92,7 +91,7 @@ if __name__ == '__main__':
         'v': env('VK_API_VERSION'),
     }
 
-    comic_number = upload_random_comic_number()
+    comic_number = random.randint(1, download_all_comics()['num'])
 
     comic_path = f'comic_{comic_number}.png'
 
