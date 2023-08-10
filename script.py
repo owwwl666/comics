@@ -70,11 +70,12 @@ def save_in_group_album_comic(parameters):
 def publish_in_group_post(comic_comments, parameters):
     """Публикует пост на стену в группу Вконтакте."""
     media_id = save_in_group_album_comic(parameters)['response'][0]['id']
+    owner_id = save_in_group_album_comic(parameters)['response'][0]['owner_id']
     url = f'https://api.vk.com/method/wall.post'
     parameters |= {
         'owner_id': -env.int('VK_GROUP_ID'),
         'from_group': 1,
-        'attachments': f'{"photo"}{env.int("VK_OWNER_ID")}_{media_id}',
+        'attachments': f'{"photo"}{owner_id}_{media_id}',
         'message': comic_comments
     }
 
