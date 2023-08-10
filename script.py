@@ -51,7 +51,7 @@ def send_server_comic(comic_path):
         }
         url = get_uploading_photo_address(parameters)
         response = requests.post(url, files=files)
-        response.raise_for_status()
+    response.raise_for_status()
     return response.json()
 
 
