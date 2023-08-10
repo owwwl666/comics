@@ -23,8 +23,8 @@ def download_comic(url, comic_path):
         file.write(comic_image.content)
 
 
-def upload_comic_comments(url):
-    """Загружает комментарии к комиксу."""
+def download_comic_comments(url):
+    """Скачивает комментарии к комиксу."""
     response = requests.get(url)
     response.raise_for_status()
     comic = response.json()
