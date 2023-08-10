@@ -77,7 +77,9 @@ def publish_in_group_post(comic_comments, parameters):
         'attachments': f'{"photo"}{env.int("VK_OWNER_ID")}_{media_id}',
         'message': comic_comments
     }
-    requests.post(url, params=parameters).raise_for_status()
+
+    publishing_post = requests.post(url, params=parameters)
+    publishing_post.raise_for_status()
 
 
 if __name__ == '__main__':
