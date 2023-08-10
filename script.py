@@ -29,10 +29,15 @@ def download_comic():
     return comic_img, comic_comments
 
 
-def get_uploading_photo_address(parameters):
+def get_uploading_photo_address(group_id, access_token, api_version):
     """Получает адрес для загрузки фото."""
+    params = {
+        'group_id': group_id,
+        'access_token': access_token,
+        'v': api_version
+    }
     response = requests.get(
-        f'https://api.vk.com/method/photos.getWallUploadServer', params=parameters)
+        f'https://api.vk.com/method/photos.getWallUploadServer', params=params)
     response.raise_for_status()
     return response.json()['response']['upload_url']
 
@@ -45,39 +50,51 @@ def send_server_comic(url, comic_path):
         files = {'photo': file}
         response = requests.post(url, files=files)
     response.raise_for_status()
-    return response.json()
+    params = response.json()
+    return params['server'], params['photo'], params['hash']
 
 
-def save_in_album_comic(server_params, parameters):
+def save_in_album_comic(server_params, group_id, access_token, api_version):
     """Сохраняет комикс в альбоме группы Вконтакте.
 
     Возвращает json с информацией о загруженном комиксе.
     """
-    parameters |= server_params
+    server, photo, hash = server_params
+    params = {
+        'group_id': group_id,
+        'access_token': access_token,
+        'v': api_version,
+        'server': server,
+        'photo': photo,
+        'hash': hash
+    }
     sending_comic = requests.post(
-        f'https://api.vk.com/method/photos.saveWallPhoto', params=parameters)
+        f'https://api.vk.com/method/photos.saveWallPhoto', params=params)
     sending_comic.raise_for_status()
     return sending_comic.json()
 
 
-def publish_in_group_post(comic_comments, parameters):
+def publish_in_group_post(comic_comments, group_id, access_token, api_version):
     """Публикует пост на стену в группу Вконтакте."""
-    download_url = get_uploading_photo_address(parameters)
+    download_url = get_uploading_photo_address(group_id, access_token, api_version)
     sending_to_server = send_server_comic(download_url, comic_path)
-    save_to_album = save_in_album_comic(sending_to_server, parameters)
+    save_to_album = save_in_album_comic(sending_to_server, group_id, access_token, api_version)
 
     media_id = save_to_album['response'][0]['id']
     owner_id = save_to_album['response'][0]['owner_id']
 
-    parameters |= {
-        'owner_id': -env.int('VK_GROUP_ID'),
+    params = {
+        'group_id': group_id,
+        'access_token': access_token,
+        'v': api_version,
+        'owner_id': -group_id,
         'from_group': 1,
         'attachments': f'{"photo"}{owner_id}_{media_id}',
         'message': comic_comments
     }
 
     publishing_post = requests.post(
-        f'https://api.vk.com/method/wall.post', params=parameters)
+        f'https://api.vk.com/method/wall.post', params=params)
     publishing_post.raise_for_status()
 
 
@@ -85,11 +102,9 @@ if __name__ == '__main__':
     env = Env()
     env.read_env()
 
-    parameters = {
-        'group_id': env('VK_GROUP_ID'),
-        'access_token': env('VK_ACCESS_TOKEN'),
-        'v': env('VK_API_VERSION'),
-    }
+    group_id = env.int('VK_GROUP_ID')
+    access_token = env.str('VK_ACCESS_TOKEN')
+    api_version = env('VK_API_VERSION')
 
     comic_number = random.randint(1, download_all_comics()['num'])
 
@@ -100,6 +115,6 @@ if __name__ == '__main__':
     with open(comic_path, 'wb') as file:
         file.write(comic_img.content)
 
-    publish_in_group_post(comic_comments, parameters)
+    publish_in_group_post(comic_comments, group_id, access_token, api_version)
 
     os.remove(comic_path)
