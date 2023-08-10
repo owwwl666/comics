@@ -2,7 +2,6 @@ import requests
 import random
 import os
 from environs import Env
-from pathlib import Path
 
 
 def upload_random_comic_number():
@@ -39,39 +38,38 @@ def get_uploading_photo_address(parameters):
     return response.json()['response']['upload_url']
 
 
-def send_server_comic(comic_path):
+def send_server_comic(url, comic_path):
     """Отправляет комикс на сервер Вконтакте.
 
     Возвращает ответ от него в виде json формата."""
-    path_ = Path.cwd().joinpath(comic_path)
-
-    with open(path_, 'rb') as file:
-        files = {
-            'photo': file
-        }
-        url = get_uploading_photo_address(parameters)
+    with open(comic_path, 'rb') as file:
+        files = {'photo': file}
         response = requests.post(url, files=files)
     response.raise_for_status()
     return response.json()
 
 
-def save_in_group_album_comic(parameters):
+def save_in_group_album_comic(server_params, parameters):
     """Сохраняет комикс в альбоме группы Вконтакте.
 
     Возвращает json с информацией о загруженном комиксе.
     """
-    url = f'https://api.vk.com/method/photos.saveWallPhoto'
-    parameters |= send_server_comic(comic_path)
-    sending_comic = requests.post(url, params=parameters)
+    parameters |= server_params
+    sending_comic = requests.post(
+        f'https://api.vk.com/method/photos.saveWallPhoto', params=parameters)
     sending_comic.raise_for_status()
     return sending_comic.json()
 
 
 def publish_in_group_post(comic_comments, parameters):
     """Публикует пост на стену в группу Вконтакте."""
-    media_id = save_in_group_album_comic(parameters)['response'][0]['id']
-    owner_id = save_in_group_album_comic(parameters)['response'][0]['owner_id']
-    url = f'https://api.vk.com/method/wall.post'
+    download_url = get_uploading_photo_address(parameters)
+    sending_to_server = send_server_comic(download_url, comic_path)
+    save_to_album = save_in_group_album_comic(sending_to_server, parameters)
+
+    media_id = save_to_album['response'][0]['id']
+    owner_id = save_to_album['response'][0]['owner_id']
+
     parameters |= {
         'owner_id': -env.int('VK_GROUP_ID'),
         'from_group': 1,
@@ -79,7 +77,8 @@ def publish_in_group_post(comic_comments, parameters):
         'message': comic_comments
     }
 
-    publishing_post = requests.post(url, params=parameters)
+    publishing_post = requests.post(
+        f'https://api.vk.com/method/wall.post', params=parameters)
     publishing_post.raise_for_status()
 
 
