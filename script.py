@@ -14,21 +14,21 @@ def upload_random_comic_number():
     return random_comic_number
 
 
-def download_comic(url, comic_path):
-    """Скачивает и сохраняет комикс."""
-    response = requests.get(url)
-    response.raise_for_status()
-    comic_image = requests.get(response.json()['img'])
-    with open(comic_path, 'wb') as file:
-        file.write(comic_image.content)
+def download_comic():
+    """Скачивает комикс.
 
-
-def download_comic_comments(url):
-    """Скачивает комментарии к комиксу."""
+    Возвращает картинку комикса и комментарии к нему.
+    """
+    url = f'https://xkcd.com/{comic_number}/info.0.json'
     response = requests.get(url)
     response.raise_for_status()
     comic = response.json()
-    return comic['alt']
+
+    comic_img = requests.get(comic['img'])
+    comic_img.raise_for_status()
+    comic_comments = comic['alt']
+
+    return comic_img, comic_comments
 
 
 def get_uploading_photo_address(parameters):
@@ -67,7 +67,7 @@ def save_in_group_album_comic(parameters):
     return saving_comic_group_album.json()
 
 
-def publish_in_group_post(comic_number, parameters):
+def publish_in_group_post(comic_comments, parameters):
     """Публикует пост на стену в группу Вконтакте."""
     media_id = save_in_group_album_comic(parameters)['response'][0]['id']
     url = f'https://api.vk.com/method/wall.post'
@@ -75,7 +75,7 @@ def publish_in_group_post(comic_number, parameters):
         'owner_id': -env.int('VK_GROUP_ID'),
         'from_group': 1,
         'attachments': f'{"photo"}{env.int("VK_OWNER_ID")}_{media_id}',
-        'message': upload_comic_comments(url=f'https://xkcd.com/{comic_number}/info.0.json')
+        'message': comic_comments
     }
     requests.post(url, params=parameters).raise_for_status()
 
@@ -92,10 +92,13 @@ if __name__ == '__main__':
 
     comic_number = upload_random_comic_number()
 
-    comic_url = f'https://xkcd.com/{comic_number}/info.0.json'
     comic_path = f'comic_{comic_number}.png'
 
-    download_comic(url=comic_url, comic_path=comic_path)
-    publish_in_group_post(comic_number=comic_number, parameters=parameters)
+    comic_img, comic_comments = download_comic()
+
+    with open(comic_path, 'wb') as file:
+        file.write(comic_img.content)
+
+    publish_in_group_post(comic_comments, parameters)
 
     os.remove(comic_path)
