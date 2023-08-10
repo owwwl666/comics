@@ -10,11 +10,10 @@ pip install -r requirements.txt
 ```
 
 ## Переменные окржуения
-В скрипте используются 4 переменных окружения. Создайте файл `.env` рядом со `script.py`. Добавьте в него четыре пары ключ-значение:
+В скрипте используются 3 переменных окружения. Создайте файл `.env` рядом со `script.py`. Добавьте в него четыре пары ключ-значение:
 
 - VK_ACCESS_TOKEN=YOUR_TOKEN
 - VK_GROUP_ID=GROUP_ID_TO_PUBLISH
-- VK_OWNER_ID=YOUR_ID
 - VK_API_VERSION=API_VERSION
 
 ## Запуск скрипта
