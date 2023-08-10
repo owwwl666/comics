@@ -49,7 +49,7 @@ def send_server_comic(url, comic_path):
     return response.json()
 
 
-def save_in_group_album_comic(server_params, parameters):
+def save_in_album_comic(server_params, parameters):
     """Сохраняет комикс в альбоме группы Вконтакте.
 
     Возвращает json с информацией о загруженном комиксе.
@@ -65,7 +65,7 @@ def publish_in_group_post(comic_comments, parameters):
     """Публикует пост на стену в группу Вконтакте."""
     download_url = get_uploading_photo_address(parameters)
     sending_to_server = send_server_comic(download_url, comic_path)
-    save_to_album = save_in_group_album_comic(sending_to_server, parameters)
+    save_to_album = save_in_album_comic(sending_to_server, parameters)
 
     media_id = save_to_album['response'][0]['id']
     owner_id = save_to_album['response'][0]['owner_id']
