@@ -67,17 +67,16 @@ def save_comic_in_album(server_value, photo_value, hash_value, group_id, access_
         'photo': photo_value,
         'hash': hash_value
     }
-    sending_comic = requests.post(
+    response = requests.post(
         f'https://api.vk.com/method/photos.saveWallPhoto', params=params)
-    sending_comic.raise_for_status()
-    return sending_comic.json()
+    response.raise_for_status()
+    return response.json()
 
 
 def publish_post_in_group(comic_comments, group_id, access_token, api_version):
     """Публикует пост на стену в группу Вконтакте."""
     download_url = get_adress_upload_photo(group_id, access_token, api_version)
-    sending_to_server = upload_comic_in_server(download_url, comic_path)
-    server_value, photo_value, hash_value = sending_to_server
+    server_value, photo_value, hash_value = upload_comic_in_server(download_url, comic_path)
     addition_to_album = save_comic_in_album(server_value, photo_value, hash_value, group_id, access_token, api_version)
 
     media_id = addition_to_album['response'][0]['id']
@@ -93,13 +92,12 @@ def publish_post_in_group(comic_comments, group_id, access_token, api_version):
         'message': comic_comments
     }
 
-    publishing_post = requests.post(
+    response = requests.post(
         f'https://api.vk.com/method/wall.post', params=params)
-    publishing_post.raise_for_status()
+    response.raise_for_status()
 
 
 if __name__ == '__main__':
-
     env = Env()
     env.read_env()
 
