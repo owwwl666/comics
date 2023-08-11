@@ -78,10 +78,10 @@ def publish_post_in_group(comic_comments, group_id, access_token, api_version):
     download_url = get_adress_upload_photo(group_id, access_token, api_version)
     sending_to_server = upload_comic_in_server(download_url, comic_path)
     server_value, photo_value, hash_value = sending_to_server
-    save_to_album = save_comic_in_album(server_value, photo_value, hash_value, group_id, access_token, api_version)
+    addition_to_album = save_comic_in_album(server_value, photo_value, hash_value, group_id, access_token, api_version)
 
-    media_id = save_to_album['response'][0]['id']
-    owner_id = save_to_album['response'][0]['owner_id']
+    media_id = addition_to_album['response'][0]['id']
+    owner_id = addition_to_album['response'][0]['owner_id']
 
     params = {
         'group_id': group_id,
