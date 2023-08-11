@@ -5,7 +5,7 @@ from environs import Env
 
 
 def get_all_comics():
-    """Скачивает все комиксы."""
+    """Получает информацию обо всех комиксах."""
     url = 'https://xkcd.com/info.0.json'
     response = requests.get(url)
     response.raise_for_status()
