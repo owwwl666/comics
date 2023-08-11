@@ -99,6 +99,7 @@ def publish_in_group_post(comic_comments, group_id, access_token, api_version):
 
 
 if __name__ == '__main__':
+
     env = Env()
     env.read_env()
 
@@ -107,7 +108,6 @@ if __name__ == '__main__':
     api_version = env('VK_API_VERSION')
 
     comic_number = random.randint(1, download_all_comics()['num'])
-
     comic_path = f'comic_{comic_number}.png'
 
     comic_img, comic_comments = download_comic()
@@ -115,6 +115,7 @@ if __name__ == '__main__':
     with open(comic_path, 'wb') as file:
         file.write(comic_img.content)
 
-    publish_in_group_post(comic_comments, group_id, access_token, api_version)
-
-    os.remove(comic_path)
+    try:
+        publish_in_group_post(comic_comments, group_id, access_token, api_version)
+    finally:
+        os.remove(comic_path)
