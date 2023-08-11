@@ -29,7 +29,7 @@ def download_comic():
     return comic_img, comic_comments
 
 
-def get_uploading_photo_address(group_id, access_token, api_version):
+def get_adress_upload_photo(group_id, access_token, api_version):
     """Получает адрес для загрузки фото."""
     params = {
         'group_id': group_id,
@@ -42,7 +42,7 @@ def get_uploading_photo_address(group_id, access_token, api_version):
     return response.json()['response']['upload_url']
 
 
-def send_server_comic(url, comic_path):
+def upload_comic_in_server(url, comic_path):
     """Отправляет комикс на сервер Вконтакте.
 
     Возвращает ответ от него в виде json формата."""
@@ -54,7 +54,7 @@ def send_server_comic(url, comic_path):
     return params['server'], params['photo'], params['hash']
 
 
-def save_in_album_comic(server_value, photo_value, hash_value, group_id, access_token, api_version):
+def save_comic_in_album(server_value, photo_value, hash_value, group_id, access_token, api_version):
     """Сохраняет комикс в альбоме группы Вконтакте.
 
     Возвращает json с информацией о загруженном комиксе.
@@ -73,12 +73,12 @@ def save_in_album_comic(server_value, photo_value, hash_value, group_id, access_
     return sending_comic.json()
 
 
-def publish_in_group_post(comic_comments, group_id, access_token, api_version):
+def publish_post_in_group(comic_comments, group_id, access_token, api_version):
     """Публикует пост на стену в группу Вконтакте."""
-    download_url = get_uploading_photo_address(group_id, access_token, api_version)
-    sending_to_server = send_server_comic(download_url, comic_path)
+    download_url = get_adress_upload_photo(group_id, access_token, api_version)
+    sending_to_server = upload_comic_in_server(download_url, comic_path)
     server_value, photo_value, hash_value = sending_to_server
-    save_to_album = save_in_album_comic(server_value, photo_value, hash_value, group_id, access_token, api_version)
+    save_to_album = save_comic_in_album(server_value, photo_value, hash_value, group_id, access_token, api_version)
 
     media_id = save_to_album['response'][0]['id']
     owner_id = save_to_album['response'][0]['owner_id']
@@ -116,6 +116,6 @@ if __name__ == '__main__':
         file.write(comic_img.content)
 
     try:
-        publish_in_group_post(comic_comments, group_id, access_token, api_version)
+        publish_post_in_group(comic_comments, group_id, access_token, api_version)
     finally:
         os.remove(comic_path)
