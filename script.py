@@ -54,19 +54,18 @@ def send_server_comic(url, comic_path):
     return params['server'], params['photo'], params['hash']
 
 
-def save_in_album_comic(server_params, group_id, access_token, api_version):
+def save_in_album_comic(server_value, photo_value, hash_value, group_id, access_token, api_version):
     """Сохраняет комикс в альбоме группы Вконтакте.
 
     Возвращает json с информацией о загруженном комиксе.
     """
-    server, photo, hash = server_params
     params = {
         'group_id': group_id,
         'access_token': access_token,
         'v': api_version,
-        'server': server,
-        'photo': photo,
-        'hash': hash
+        'server': server_value,
+        'photo': photo_value,
+        'hash': hash_value
     }
     sending_comic = requests.post(
         f'https://api.vk.com/method/photos.saveWallPhoto', params=params)
@@ -78,7 +77,8 @@ def publish_in_group_post(comic_comments, group_id, access_token, api_version):
     """Публикует пост на стену в группу Вконтакте."""
     download_url = get_uploading_photo_address(group_id, access_token, api_version)
     sending_to_server = send_server_comic(download_url, comic_path)
-    save_to_album = save_in_album_comic(sending_to_server, group_id, access_token, api_version)
+    server_value, photo_value, hash_value = sending_to_server
+    save_to_album = save_in_album_comic(server_value, photo_value, hash_value, group_id, access_token, api_version)
 
     media_id = save_to_album['response'][0]['id']
     owner_id = save_to_album['response'][0]['owner_id']
